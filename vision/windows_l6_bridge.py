@@ -28,7 +28,7 @@ GESTURE_BY_DATA = {
     tuple([1, 65, 180, 255, 255, 25, 25]): "SCISSORS",
 }
 
-# 与 testing/pose_*.py 左手的姿势一致（0~100）
+# 与 testing/poses/pose_*.py 左手的姿势一致（0~100）
 POSES = {
     "left": {
         "ROCK": L6Angle(thumb_flex=20, thumb_abd=20, index=55, middle=50, ring=50, pinky=50),

@@ -26,10 +26,10 @@ env/
 Thumbs.db
 desktop.ini
 
-# 调试日志（本地运行产生）
+# 调试日志
 *.log
 debug-*.log
 
-# 本地分析输出（含本机路径的历史记录，可本地保留不上传）
-角度标定/L6.data/analysis_joint2.txt
-角度标定/L6.data/analysis_output.txt
+# 本地分析输出
+calibration/data/analysis_joint2.txt
+calibration/data/analysis_output.txt

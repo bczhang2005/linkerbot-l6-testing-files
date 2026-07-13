@@ -7,7 +7,7 @@
 
 【前置条件】
   · 已激活 linkerbot 虚拟环境
-  · 在本目录执行：cd testing/角度标定
+  · 在本目录执行：cd testing/calibration
   · PCAN 已连接，灵巧手已上电；HAND_SIDE 与实物一致
   · WitMotion 固定在被测手指上，上位机可正常读数
   · 关闭 PCAN-View 等占用 PCAN 通道的程序
@@ -53,9 +53,9 @@ from linkerbot.exceptions import TimeoutError as LinkerTimeoutError
 _DIR = Path(__file__).resolve().parent
 _DATA_DIR = _DIR / "data"
 _DATA_DIR.mkdir(exist_ok=True)
-_TESTING_DIR = _DIR.parent
-if str(_TESTING_DIR) not in sys.path:
-    sys.path.insert(0, str(_TESTING_DIR))
+_POSES_DIR = _DIR.parent / "poses"
+if str(_POSES_DIR) not in sys.path:
+    sys.path.insert(0, str(_POSES_DIR))
 from pose_common import exit_if_hand_offline
 
 AxisName = Literal["roll", "pitch", "yaw"]

@@ -38,7 +38,7 @@ Windows 上无法直接使用 Linux 版 `can-bridge`，因此采用 **linkerbot 
              │ POST :5260/api/can             │
 ┌────────────▼───────────────────────────────┐│
 │  windows_l6_bridge.py  :5260 + :7080         ││
-│  路径：testing/                              ││
+│  路径：testing/vision/                     ││
 │  linkerbot → PCAN_USBBUS1 → L6 左手          ││
 └──────────────────────────────────────────────┘│
                                                 │
@@ -109,10 +109,10 @@ conda activate linkerbot
 pip install linkerbot
 ```
 
-验证（在 `testing` 目录）：
+验证（在 `testing/setup` 目录）：
 
 ```powershell
-cd testing
+cd testing/setup
 python test_env_full.py
 ```
 
@@ -137,7 +137,7 @@ python test_env_full.py
 #### RealSense → 虚拟摄像头
 
 ```powershell
-cd testing
+cd testing/vision
 pip install -r realsense_virtual_cam_requirements.txt
 ```
 
@@ -168,7 +168,7 @@ dexterous/dexterous-hand-rps/
 
 ```powershell
 conda activate linkerbot
-cd testing
+cd testing/setup
 python test1_connect.py
 ```
 
@@ -209,7 +209,7 @@ python 硬件连接测试.py
 **终端 A**（PowerShell）：
 
 ```powershell
-cd testing
+cd testing/vision
 python realsense_virtual_cam.py
 ```
 
@@ -230,7 +230,7 @@ RealSense 已启动 Color 流: 640x480 @ 30fps
 
 ```powershell
 conda activate linkerbot
-cd testing
+cd testing/vision
 python windows_l6_bridge.py
 ```
 
@@ -410,21 +410,19 @@ go run server.go -port 8090 -model l6
 
 ```
 <项目根目录>/
-├── 环境.txt                               ← conda 环境备忘
 ├── testing/
-│   ├── 石头剪刀布游戏-Windows完整指南.md    ← 本文档
-│   ├── realsense_virtual_cam.py         ← D405 Color → OBS 虚拟摄像头
-│   ├── realsense_virtual_cam_requirements.txt
-│   ├── windows_l6_bridge.py             ← L6 PCAN 桥接（7080 + 5260）
-│   ├── test1_connect.py                   ← PCAN + L6 连接测试
-│   ├── 硬件连接测试.py
-│   └── pose_*.py                          ← 单姿势测试脚本
+│   ├── docs/                            ← 操作指南（本文档）
+│   ├── setup/                           ← 连接测试（test1_connect.py 等）
+│   ├── vision/                          ← 视觉联动脚本
+│   │   ├── realsense_virtual_cam.py     ← D405 Color → OBS 虚拟摄像头
+│   │   ├── windows_l6_bridge.py         ← L6 PCAN 桥接（7080 + 5260）
+│   │   └── hand_tracking_service.py
+│   └── poses/                           ← 单姿势测试脚本
 └── dexterous/
-    └── dexterous-hand-rps/                ← 游戏主项目
-        ├── server.go                      ← Go Web 服务（默认 :8899）
-        ├── 6.gameplay/                    ← 竞技模式
-        ├── 5.always-win/                  ← 必胜模式
-        └── shared/rps-recognition.js      ← 手势识别算法
+    └── dexterous-hand-rps/              ← 游戏主项目（公司代码）
+        ├── server.go
+        ├── 6.gameplay/
+        └── shared/rps-recognition.js
 ```
 
 ### 关键配置（按需修改）

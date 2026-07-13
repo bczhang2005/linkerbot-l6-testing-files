@@ -1,5 +1,11 @@
-# 进入 linkerbot 环境并切换到 testing 目录
-# 请先将终端 cd 到你本机上的项目根目录，再执行以下命令
+# 进入 linkerbot 环境
+# 请先将终端 cd 到你本机上的 testing 目录，再进入对应子目录执行脚本
 
 conda activate linkerbot
-cd testing
+
+# 示例：
+#   cd setup      → 连接测试
+#   cd sdk_tests  → SDK 功能测试
+#   cd poses      → 姿势控制
+#   cd vision     → 视觉联动 / 桥接
+#   cd calibration → 角度标定

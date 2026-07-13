@@ -12,7 +12,7 @@
 
 【操作步骤】
   1. 按实物修改下方 HAND_SIDE（left / right）
-  2. 在 testing 目录执行：python 硬件连接测试.py
+  2. 在 testing/setup 目录执行：python 硬件连接测试.py
   3. 观察终端：阶段1（CAN 通道）→ 阶段2（读角度，方式1 失败则试方式2）
   4. 若当前 side 失败，脚本会自动用另一只手再测一次
 

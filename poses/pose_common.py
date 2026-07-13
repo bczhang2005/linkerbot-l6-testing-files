@@ -22,8 +22,8 @@ def print_hand_offline_help(last_error: str, preferred_side: str) -> None:
     print("  3. PCAN 驱动是否正常，是否被 PCAN-View 等程序占用")
     print("  4. HAND_SIDE 是否与实物一致（left / right）")
     print("\n建议先运行连接测试：")
-    print("  python test1_connect.py")
-    print("  python 硬件连接测试.py")
+    print("  cd setup && python test1_connect.py")
+    print("  cd setup && python 硬件连接测试.py")
 
 
 def verify_hand_online(hand, timeout_ms: int = VERIFY_TIMEOUT_MS) -> list[float]:
