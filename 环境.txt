@@ -1,0 +1,5 @@
+# 进入 linkerbot 环境并切换到 testing 目录
+# 请先将终端 cd 到你本机上的项目根目录，再执行以下命令
+
+conda activate linkerbot
+cd testing
