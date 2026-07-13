@@ -1,6 +1,6 @@
 # testing — L6 灵巧手实验与测试脚本
 
-本目录为个人编写的 **LinkerHand L6 灵巧手** 实验代码，用于在 Windows + PCAN 环境下完成：环境验证、SDK 功能探索、姿势控制、视觉联动、角度标定等工作。
+本目录为个人编写的 **LinkerBot L6 灵巧手** 实验代码，用于在 Windows + PCAN 环境下完成：环境验证、SDK 功能探索、姿势控制、视觉联动、角度标定等工作。
 
 > 依赖公司的 `linkerbot` SDK 与 `dexterous-hand-rps` Web 游戏（不包含在本仓库中）。
 
