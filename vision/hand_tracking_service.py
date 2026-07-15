@@ -35,8 +35,21 @@ WS_PORT = 8765
 COLOR_W = 640
 COLOR_H = 480
 COLOR_FPS = 30
-PREVIEW_EVERY_N = 2
-DEPTH_PATCH = 3
+PREVIEW_W = 640
+PREVIEW_H = 480
+PREVIEW_EVERY_N = 1
+DEPTH_PATCH = 5
+HANDS_HOLD_S = 0.25
+LANDMARK_2D_SMOOTH = 0.45
+
+HAND_CONNECTIONS = [
+    (0, 1), (1, 2), (2, 3), (3, 4),
+    (0, 5), (5, 6), (6, 7), (7, 8),
+    (0, 9), (9, 10), (10, 11), (11, 12),
+    (0, 13), (13, 14), (14, 15), (15, 16),
+    (0, 17), (17, 18), (18, 19), (19, 20),
+    (5, 9), (9, 13), (13, 17),
+]
 HAND_MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/hand_landmarker/"
     "hand_landmarker/float16/1/hand_landmarker.task"
@@ -109,6 +122,9 @@ class RealSenseHandTracker:
         self._frame_count = 0
         self._last_fps_time = time.time()
         self._fps = 0.0
+        self._smooth_2d: dict[str, list[dict[str, float]]] = {}
+        self._last_hands_draw: list[dict[str, Any]] = []
+        self._last_hands_draw_t = 0.0
 
     def close(self) -> None:
         self.landmarker.close()
@@ -170,21 +186,117 @@ class RealSenseHandTracker:
         aligned = (rot @ rel.T).T
         return aligned
 
+    def _smooth_landmarks2d(
+        self, label: str, points: list[dict[str, float]]
+    ) -> list[dict[str, float]]:
+        prev = self._smooth_2d.get(label)
+        if not prev:
+            self._smooth_2d[label] = points
+            return points
+        alpha = LANDMARK_2D_SMOOTH
+        out = [
+            {
+                "x": alpha * p["x"] + (1.0 - alpha) * prev[i]["x"],
+                "y": alpha * p["y"] + (1.0 - alpha) * prev[i]["y"],
+            }
+            for i, p in enumerate(points)
+        ]
+        self._smooth_2d[label] = out
+        return out
+
+    def _depth_to_bgr(self, depth_m: float) -> tuple[int, int, int]:
+        """近=黄，远=蓝（深度着色，与 2D 固定色不同）。"""
+        near, far = 0.20, 0.60
+        t = max(0.0, min(1.0, (depth_m - near) / (far - near)))
+        b = int(255 * (1.0 - t * 0.85))
+        g = int(220 * (1.0 - t * 0.35))
+        r = int(80 + 175 * t)
+        return (b, g, r)
+
+    def _draw_depth_legend(self, bgr: np.ndarray) -> None:
+        h, w = bgr.shape[:2]
+        x0, y0 = 10, h - 36
+        bar_w = 180
+        cv2.putText(
+            bgr, "深度", (x0, y0 - 6),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1, cv2.LINE_AA,
+        )
+        for i in range(bar_w):
+            d = 0.20 + (0.40 * i / bar_w)
+            c = self._depth_to_bgr(d)
+            cv2.line(bgr, (x0 + i, y0), (x0 + i, y0 + 10), c, 1)
+        cv2.putText(bgr, "近", (x0, y0 + 24), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 230, 255), 1, cv2.LINE_AA)
+        cv2.putText(bgr, "远", (x0 + bar_w - 18, y0 + 24), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 180, 120), 1, cv2.LINE_AA)
+
+    def _draw_hands_on_bgr(self, bgr: np.ndarray, hands: list[dict[str, Any]]) -> None:
+        """骨架画进预览：连线按左右手，关节点按深度着色。"""
+        h, w = bgr.shape[:2]
+        for hand in hands:
+            lm2d = hand.get("landmarks2d")
+            depths_m = hand.get("depths_m")
+            if not lm2d or len(lm2d) < 21:
+                continue
+            label = hand.get("label", "Right")
+            side_color = (0, 200, 0) if label == "Left" else (0, 0, 200)
+            pts = [(int(lm["x"] * w), int(lm["y"] * h)) for lm in lm2d]
+            for i, j in HAND_CONNECTIONS:
+                if i < len(pts) and j < len(pts):
+                    cv2.line(bgr, pts[i], pts[j], side_color, 1, cv2.LINE_AA)
+            for idx, pt in enumerate(pts):
+                if depths_m and idx < len(depths_m):
+                    pt_color = self._depth_to_bgr(depths_m[idx])
+                    radius = 5 if idx in (4, 8, 12, 16, 20) else 4
+                else:
+                    pt_color = side_color
+                    radius = 3
+                cv2.circle(bgr, pt, radius, pt_color, -1, lineType=cv2.LINE_AA)
+            proof = hand.get("depth_proof") or {}
+            wrist_cm = proof.get("wrist_depth_cm")
+            if wrist_cm is not None and pts:
+                cv2.putText(
+                    bgr,
+                    f"{wrist_cm:.0f}cm",
+                    (pts[0][0] + 6, pts[0][1] + 4),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.45,
+                    (0, 255, 255),
+                    1,
+                    cv2.LINE_AA,
+                )
+        self._draw_depth_legend(bgr)
+
     def _landmarks_3d(
         self, landmarks, depth_frame, img_w: int, img_h: int
-    ) -> list[list[float]] | None:
+    ) -> tuple[list[list[float]], list[float], dict[str, Any]] | None:
+        wrist_u = int(np.clip(landmarks[0].x * img_w, 0, img_w - 1))
+        wrist_v = int(np.clip(landmarks[0].y * img_h, 0, img_h - 1))
+        wrist_depth = self._sample_depth_m(depth_frame, wrist_u, wrist_v) or 0.35
+
         points: list[np.ndarray] = []
+        depths_m: list[float] = []
         for lm in landmarks:
             u = int(np.clip(lm.x * img_w, 0, img_w - 1))
             v = int(np.clip(lm.y * img_h, 0, img_h - 1))
             depth_m = self._sample_depth_m(depth_frame, u, v)
             if depth_m is None:
-                depth_m = 0.35
+                depth_m = wrist_depth
+            depths_m.append(float(depth_m))
             points.append(self._backproject(u, v, depth_m))
 
         pts = np.stack(points, axis=0)
         hand_pts = self._to_hand_frame(pts)
-        return hand_pts.round(6).tolist()
+        depth_proof = {
+            "source": "realsense_d405_depth",
+            "wrist_depth_cm": round(depths_m[0] * 100, 1),
+            "finger_spread_cm": round((max(depths_m) - min(depths_m)) * 100, 1),
+            "thumb_tip_depth_cm": round(depths_m[4] * 100, 1),
+            "index_tip_depth_cm": round(depths_m[8] * 100, 1),
+            "middle_tip_depth_cm": round(depths_m[12] * 100, 1),
+            "thumb_tip_3d": hand_pts[4].round(4).tolist(),
+            "index_tip_3d": hand_pts[8].round(4).tolist(),
+            "middle_tip_3d": hand_pts[12].round(4).tolist(),
+        }
+        return hand_pts.round(6).tolist(), depths_m, depth_proof
 
     def process_frame(self) -> dict[str, Any]:
         frames = self.pipeline.wait_for_frames(timeout_ms=5000)
@@ -205,17 +317,34 @@ class RealSenseHandTracker:
 
         if results.hand_landmarks and results.handedness:
             for hand_lms, handed in zip(results.hand_landmarks, results.handedness):
-                lm3d = self._landmarks_3d(hand_lms, depth_frame, w, h)
-                if lm3d is None:
+                packed = self._landmarks_3d(hand_lms, depth_frame, w, h)
+                if packed is None:
                     continue
+                lm3d, depths_m, depth_proof = packed
                 cat = handed[0]
+                label = cat.category_name
+                lm2d_raw = [{"x": lm.x, "y": lm.y} for lm in hand_lms]
+                lm2d = self._smooth_landmarks2d(label, lm2d_raw)
                 hands_out.append(
                     {
-                        "label": cat.category_name,
+                        "label": label,
                         "score": round(float(cat.score), 4),
                         "landmarks": lm3d,
+                        "landmarks2d": lm2d,
+                        "depth_proof": depth_proof,
+                        "depths_m": depths_m,
                     }
                 )
+
+        now_draw = time.time()
+        if hands_out:
+            self._last_hands_draw = hands_out
+            self._last_hands_draw_t = now_draw
+        elif now_draw - self._last_hands_draw_t > HANDS_HOLD_S:
+            self._last_hands_draw = []
+            self._smooth_2d.clear()
+
+        hands_for_preview = hands_out if hands_out else self._last_hands_draw
 
         self._frame_count += 1
         now = time.time()
@@ -227,14 +356,19 @@ class RealSenseHandTracker:
         payload: dict[str, Any] = {
             "type": "frame",
             "fps": self._fps,
-            "hands": hands_out,
+            "hands": [
+                {k: v for k, v in hand.items() if k != "depths_m"}
+                for hand in hands_out
+            ],
         }
 
-        if self._frame_count % PREVIEW_EVERY_N == 0:
-            preview = cv2.resize(color, (320, 240))
-            ok, buf = cv2.imencode(".jpg", preview, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-            if ok:
-                payload["preview"] = base64.b64encode(buf.tobytes()).decode("ascii")
+        preview_bgr = color.copy()
+        if hands_for_preview:
+            self._draw_hands_on_bgr(preview_bgr, hands_for_preview)
+        preview = cv2.resize(preview_bgr, (PREVIEW_W, PREVIEW_H))
+        ok, buf = cv2.imencode(".jpg", preview, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+        if ok:
+            payload["preview"] = base64.b64encode(buf.tobytes()).decode("ascii")
 
         return payload
 

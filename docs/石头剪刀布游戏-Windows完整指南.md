@@ -2,7 +2,7 @@
 
 本文档说明在 **Windows + PCAN + L6 灵巧手 + Intel RealSense D405** 环境下，从搭建环境到使用虚拟摄像头运行石头剪刀布竞技模式的完整流程。
 
-> 文中所有 `cd` 命令均相对于**项目根目录**（包含 `testing/`、`dexterous/` 等子文件夹的目录）。请先将终端切换到你本机上的项目根目录。
+> 文中所有 `cd` 命令均相对于**项目根目录**（包含 `testing/` 等子文件夹的目录；游戏项目位于 `testing/dexterous/` 下）。请先将终端切换到你本机上的项目根目录。
 
 ---
 
@@ -33,7 +33,7 @@ Windows 上无法直接使用 Linux 版 `can-bridge`，因此采用 **linkerbot 
              │ POST /api/gesture/batch        │
 ┌────────────▼───────────────────────────────┐│
 │  dexterous-hand-rps (Go)  :8899            ││
-│  路径：dexterous/dexterous-hand-rps/        ││
+│  路径：testing/dexterous/dexterous-hand-rps/ ││
 └────────────┬───────────────────────────────┘│
              │ POST :5260/api/can             │
 ┌────────────▼───────────────────────────────┐│
@@ -155,7 +155,7 @@ conda activate linkerbot
 游戏代码位于：
 
 ```
-dexterous/dexterous-hand-rps/
+testing/dexterous/dexterous-hand-rps/
 ```
 
 首次运行会自动编译，无需单独 `go build`。
@@ -250,7 +250,7 @@ Windows L6 桥接已启动
 **终端 C**（PowerShell）：
 
 ```powershell
-cd dexterous\dexterous-hand-rps
+cd testing\dexterous\dexterous-hand-rps
 go run server.go -port 8899 -model l6
 ```
 
@@ -417,12 +417,12 @@ go run server.go -port 8090 -model l6
 │   │   ├── realsense_virtual_cam.py     ← D405 Color → OBS 虚拟摄像头
 │   │   ├── windows_l6_bridge.py         ← L6 PCAN 桥接（7080 + 5260）
 │   │   └── hand_tracking_service.py
-│   └── poses/                           ← 单姿势测试脚本
-└── dexterous/
-    └── dexterous-hand-rps/              ← 游戏主项目（公司代码）
-        ├── server.go
-        ├── 6.gameplay/
-        └── shared/rps-recognition.js
+│   ├── poses/                           ← 单姿势测试脚本
+│   └── dexterous/
+│       └── dexterous-hand-rps/          ← 游戏主项目（公司代码）
+│           ├── server.go
+│           ├── 6.gameplay/
+│           └── shared/rps-recognition.js
 ```
 
 ### 关键配置（按需修改）
@@ -444,7 +444,7 @@ LOGICAL_INTERFACE = "can0"  # 与 Go 侧一致，无需改为 PCAN 名
 只需 **终端 C + 浏览器**，摄像头用内置或 OBS Virtual Camera：
 
 ```powershell
-cd dexterous\dexterous-hand-rps
+cd testing\dexterous\dexterous-hand-rps
 go run server.go
 ```
 

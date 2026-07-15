@@ -2,7 +2,7 @@
 
 本目录为个人编写的 **LinkerBot L6 灵巧手** 实验代码，用于在 Windows + PCAN 环境下完成：环境验证、SDK 功能探索、姿势控制、视觉联动、角度标定等工作。
 
-> 依赖公司的 `linkerbot` SDK 与 `dexterous-hand-rps` Web 游戏（不包含在本仓库中）。
+> 依赖公司的 `linkerbot` SDK；`dexterous-hand-rps` Web 游戏位于本目录下 `dexterous/` 中。
 
 ---
 
@@ -16,20 +16,22 @@ testing/
 ├── setup/                    ← 环境与连接验证
 ├── sdk_tests/                ← SDK 功能测试（test 系列）
 ├── poses/                    ← 预设姿势与 GUI 调试
-├── vision/                   ← RealSense、桥接、3D 跟踪服务
+├── vision/                   ← RealSense D405：2D 虚拟摄像头、3D 跟踪、L6 桥接（见 vision/README.md）
 ├── calibration/              ← 角度标定流水线与数据
+├── dexterous/                ← 公司 dexterous-hand-rps Web 游戏
 └── docs/                     ← 操作指南
 ```
 
 
-| 子目录            | 内容                       | 典型入口                              |
-| -------------- | ------------------------ | --------------------------------- |
-| `setup/`       | 环境检测、PCAN 连接测试           | `test1_connect.py`                |
-| `sdk_tests/`   | 运动/读取/传感器/队列复现           | `test2_move.py` → `test3_read.py` |
-| `poses/`       | `pose_*.py`、滑条/监控 GUI    | `angle_slider.py`                 |
-| `vision/`      | 虚拟摄像头、L6 桥接、WebSocket 跟踪 | `windows_l6_bridge.py`            |
-| `calibration/` | WitMotion 标定采集→拟合→画图     | `角度标定_采集.py`                      |
-| `docs/`        | 石头剪刀布游戏 Windows 指南       | 快速启动 / 完整指南                       |
+| 子目录            | 内容                    | 典型入口                              |
+| -------------- | --------------------- | --------------------------------- |
+| `setup/`       | 环境检测、PCAN 连接测试        | `test1_connect.py`                |
+| `sdk_tests/`   | 运动/读取/传感器/队列复现        | `test2_move.py` → `test3_read.py` |
+| `poses/`       | `pose_*.py`、滑条/监控 GUI | `angle_slider.py`                 |
+| `vision/`      | D405 2D/3D 视觉脚本、L6 桥接 | `vision/README.md` → 按路线选脚本       |
+| `calibration/` | WitMotion 标定采集→拟合→画图  | `角度标定_采集.py`                      |
+| `dexterous/`   | 石头剪刀布 Web 游戏（Go）     | `dexterous-hand-rps/server.go`        |
+| `docs/`        | 石头剪刀布游戏 Windows 指南    | 快速启动 / 完整指南                       |
 
 
 ---
@@ -86,11 +88,29 @@ cd ../dexterous/dexterous-hand-rps      # 终端 C（需公司游戏代码）
 go run server.go -port 8899 -model l6
 ```
 
+浏览器打开 `http://localhost:8899/6.gameplay/`，摄像头选 **OBS Virtual Camera**。
+
+### D405 3D 关节跟随
+
+与上节 **2D 游戏路线不同**：不需 OBS，改用 `hand_tracking_service.py`。步骤见 `vision/README.md` 与 `docs/石头剪刀布游戏-快速启动.md` 文末附节。
+
+```powershell
+cd testing/vision
+python hand_tracking_service.py          # 终端 A
+python windows_l6_bridge.py            # 终端 B
+cd ../dexterous/dexterous-hand-rps      # 终端 C
+go run server.go -port 8899 -model l6
+```
+
+浏览器：`http://localhost:8899/7.follow-me-3d/` → 连接 3D 跟踪。
+
+> **勿同时**运行 `realsense_virtual_cam.py` 与 `hand_tracking_service.py`（会抢 D405）。
+
 
 
 ### 角度标定
 
-完整说明见 `calibration/README.md`**。**
+完整说明见 `calibration/README.md`。
 
 ```powershell
 cd testing/calibration
@@ -148,15 +168,17 @@ python 角度标定_画图.py
 
 ### vision/ — 视觉联动
 
-
-| 脚本                         | 作用                                  |
-| -------------------------- | ----------------------------------- |
-| `realsense_virtual_cam.py` | D405 彩色流 → OBS 虚拟摄像头                |
-| `windows_l6_bridge.py`     | PCAN 桥接（:7080 设备发现 + :5260 CAN 转发）  |
-| `hand_tracking_service.py` | RealSense 3D 手部跟踪 → WebSocket :8765 |
+> 含 2D（OBS 虚拟摄像头）、3D（深度跟手）、共用桥接三条线。文件对照与原理见 **[vision/README.md](vision/README.md)**。
 
 
+| 脚本                         | 路线  | 作用                                                         |
+| -------------------------- | --- | ---------------------------------------------------------- |
+| `realsense_virtual_cam.py` | 2D  | D405 彩色流 → OBS 虚拟摄像头（`/6.gameplay/`、`/4.follow-me/`）       |
+| `hand_tracking_service.py` | 3D  | D405 Color + Depth → WebSocket `:8765`（`/7.follow-me-3d/`） |
+| `windows_l6_bridge.py`     | 共用  | PCAN 桥接（`:7080` 设备发现 + `:5260` CAN 转发）                     |
 
+
+依赖：`realsense_virtual_cam_requirements.txt`（2D）、`hand_tracking_requirements.txt`（3D）。
 
 ### calibration/ — 角度标定
 
@@ -174,7 +196,7 @@ python 角度标定_画图.py
 ### docs/ — 操作指南
 
 - `石头剪刀布游戏-Windows完整指南.md`
-- `石头剪刀布游戏-快速启动.md`
+- `石头剪刀布游戏-快速启动.md`（含 2D 游戏与 3D 跟随启动）
 
 ---
 
@@ -183,10 +205,10 @@ python 角度标定_画图.py
 ## 与公司代码的关系
 
 
-| 公司代码                 | 本仓库如何使用                                    |
-| -------------------- | ------------------------------------------ |
-| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件     |
-| `dexterous-hand-rps` | `vision/windows_l6_bridge.py` 桥接其 HTTP API |
+| 公司代码                 | 本仓库如何使用                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件                                                          |
+| `dexterous-hand-rps` | `vision/windows_l6_bridge.py` 桥接其 HTTP API；页面 `/4.follow-me/`、`/6.gameplay/`、`/7.follow-me-3d/` |
 
 
 ---

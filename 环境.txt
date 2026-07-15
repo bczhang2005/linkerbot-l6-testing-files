@@ -9,3 +9,4 @@ conda activate linkerbot
 #   cd poses      → 姿势控制
 #   cd vision     → 视觉联动 / 桥接
 #   cd calibration → 角度标定
+#   cd dexterous/dexterous-hand-rps → 石头剪刀布游戏服务
