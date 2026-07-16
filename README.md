@@ -2,7 +2,7 @@
 
 本目录为个人编写的 **LinkerBot L6 灵巧手** 实验代码，用于在 Windows + PCAN 环境下完成：环境验证、SDK 功能探索、姿势控制、视觉联动、角度标定等工作。
 
-> 依赖公司的 `linkerbot` SDK；`dexterous-hand-rps` Web 游戏位于本目录下 `dexterous/` 中。
+> 依赖公司的 `linkerbot` SDK；改编版 `dexterous-hand-rps` Web 游戏位于本目录下 `dexterous/` 中（基于公司原版，含 3D 跟随等自创功能）。
 
 ---
 
@@ -18,20 +18,20 @@ testing/
 ├── poses/                    ← 预设姿势与 GUI 调试
 ├── vision/                   ← RealSense D405：2D 虚拟摄像头、3D 跟踪、L6 桥接（见 vision/README.md）
 ├── calibration/              ← 角度标定流水线与数据
-├── dexterous/                ← 公司 dexterous-hand-rps Web 游戏
+├── dexterous/                ← 改编版 dexterous-hand-rps Web 游戏（含 3D 跟随等自创功能）
 └── docs/                     ← 操作指南
 ```
 
 
-| 子目录            | 内容                    | 典型入口                              |
-| -------------- | --------------------- | --------------------------------- |
-| `setup/`       | 环境检测、PCAN 连接测试        | `test1_connect.py`                |
-| `sdk_tests/`   | 运动/读取/传感器/队列复现        | `test2_move.py` → `test3_read.py` |
-| `poses/`       | `pose_*.py`、滑条/监控 GUI | `angle_slider.py`                 |
-| `vision/`      | D405 2D/3D 视觉脚本、L6 桥接 | `vision/README.md` → 按路线选脚本       |
-| `calibration/` | WitMotion 标定采集→拟合→画图  | `角度标定_采集.py`                      |
-| `dexterous/`   | 石头剪刀布 Web 游戏（Go）     | `dexterous-hand-rps/server.go`        |
-| `docs/`        | 石头剪刀布游戏 Windows 指南    | 快速启动 / 完整指南                       |
+| 子目录            | 内容                     | 典型入口                              |
+| -------------- | ---------------------- | --------------------------------- |
+| `setup/`       | 环境检测、PCAN 连接测试         | `test1_connect.py`                |
+| `sdk_tests/`   | 运动/读取/传感器/队列复现         | `test2_move.py` → `test3_read.py` |
+| `poses/`       | `pose_*.py`、滑条/监控 GUI  | `angle_slider.py`                 |
+| `vision/`      | D405 2D/3D 视觉脚本、L6 桥接  | `vision/README.md` → 按路线选脚本       |
+| `calibration/` | WitMotion 标定采集→拟合→画图   | `角度标定_采集.py`                      |
+| `dexterous/`   | 改编版 Web 游戏（Go，含 3D 跟随） | `dexterous-hand-rps/server.go`    |
+| `docs/`        | 石头剪刀布游戏 Windows 指南     | 快速启动 / 完整指南                       |
 
 
 ---
@@ -84,7 +84,7 @@ python test1_connect.py
 cd testing/vision
 python realsense_virtual_cam.py          # 终端 A
 python windows_l6_bridge.py            # 终端 B（另开窗口）
-cd ../dexterous/dexterous-hand-rps      # 终端 C（需公司游戏代码）
+cd ../dexterous/dexterous-hand-rps      # 终端 C
 go run server.go -port 8899 -model l6
 ```
 
@@ -180,6 +180,34 @@ python 角度标定_画图.py
 
 依赖：`realsense_virtual_cam_requirements.txt`（2D）、`hand_tracking_requirements.txt`（3D）。
 
+### dexterous/ — 灵巧手 Web 游戏（改编版）
+
+基于公司开源项目 [zhuzx17/dexterous-hand-rps](https://github.com/zhuzx17/dexterous-hand-rps) 改编，代码位于 `dexterous/dexterous-hand-rps/`。原版提供浏览器端手势识别与石头剪刀布等页面；本仓库在其基础上增加了与 L6 + D405 实验配套的**新增功能**。
+
+**主要新增 / 改动：**
+
+
+| 路径                        | 说明                                                                      |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `7.follow-me-3d/`         | **3D 关节跟随页面**（新增），消费 `vision/hand_tracking_service.py` 的 WebSocket 深度数据 |
+| `shared/hand-retarget.js` | **3D 手部重定向**（新增），将 21 点 3D 手系映射为 7 字节 CAN 帧                             |
+| `server.go`               | 适配 `-model l6` 启动参数，配合 `windows_l6_bridge.py` 转发 CAN                    |
+| `index.html`              | 主页增加 3D 跟随入口                                                            |
+| `4.follow-me/app.js`      | 2D 跟随逻辑微调，配合 Windows 桥接                                                 |
+
+
+**常用页面：**
+
+
+| 地址                 | 用途                                        |
+| ------------------ | ----------------------------------------- |
+| `/6.gameplay/`     | 石头剪刀布竞技（2D，需 OBS 虚拟摄像头）                   |
+| `/4.follow-me/`    | 2D 手势跟随                                   |
+| `/7.follow-me-3d/` | **3D 关节跟随**（需 `hand_tracking_service.py`） |
+
+
+启动方式见上文「运行石头剪刀布游戏」与「D405 3D 关节跟随」；与 `vision/` 中的 Python 桥接脚本配合使用。
+
 ### calibration/ — 角度标定
 
 研究 **电机原始值（0~255）与 WitMotion 真实角度** 的映射关系。完整说明见 **[calibration/README.md](calibration/README.md)**。
@@ -205,10 +233,10 @@ python 角度标定_画图.py
 ## 与公司代码的关系
 
 
-| 公司代码                 | 本仓库如何使用                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件                                                          |
-| `dexterous-hand-rps` | `vision/windows_l6_bridge.py` 桥接其 HTTP API；页面 `/4.follow-me/`、`/6.gameplay/`、`/7.follow-me-3d/` |
+| 公司代码                 | 本仓库如何使用                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件                                                                                    |
+| `dexterous-hand-rps` | 改编版已纳入本仓库 `dexterous/`；`vision/windows_l6_bridge.py` 桥接其 HTTP API；页面 `/4.follow-me/`、`/6.gameplay/`、自创 `/7.follow-me-3d/` |
 
 
 ---
