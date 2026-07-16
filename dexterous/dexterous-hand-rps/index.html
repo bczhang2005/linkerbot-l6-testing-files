@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵心巧手 - 石头剪刀布游戏平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #666;
+            opacity: 0.9;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .game-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .game-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .game-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .game-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .game-features li {
+            color: #555;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .game-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 50px;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .game-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .game-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 灵心巧手</h1>
+            <p>石头剪刀布智能对战平台</p>
+        </div>
+
+        <div class="game-grid">
+            <a href="7.follow-me-3d/" class="game-card">
+                <div class="game-icon">🎯</div>
+                <div class="game-title">3D 跟随模式</div>
+                <div class="game-description">
+                    RealSense D405 深度 + 彩色，真实 3D 关节跟随 L6。
+                </div>
+                <ul class="game-features">
+                    <li>D405 Color + Depth</li>
+                    <li>深度读数与 3D 关节角</li>
+                    <li>hand_tracking_service 直连</li>
+                </ul>
+            </a>
+
+            <a href="4.follow-me/" class="game-card">
+                <div class="game-icon">🤝</div>
+                <div class="game-title">2D 跟随模式</div>
+                <div class="game-description">
+                    普通摄像头或 OBS 虚拟摄像头，浏览器 2D 手势跟随。
+                </div>
+                <ul class="game-features">
+                    <li>实时手势识别</li>
+                    <li>精确动作模仿</li>
+                    <li>低延迟响应</li>
+                </ul>
+            </a>
+
+            <a href="5.always-win/" class="game-card">
+                <div class="game-icon">🏆</div>
+                <div class="game-title">必胜模式</div>
+                <div class="game-description">
+                    灵巧手会分析你的手势并出克制手势，展示AI的预判能力。
+                </div>
+                <ul class="game-features">
+                    <li>智能手势识别</li>
+                    <li>策略性出招</li>
+                    <li>AI算法优化</li>
+                </ul>
+            </a>
+
+            <a href="6.gameplay/" class="game-card">
+                <div class="game-icon">🎮</div>
+                <div class="game-title">竞技模式</div>
+                <div class="game-description">
+                    与灵巧手进行公平对战，体验最刺激的石头剪刀布游戏。
+                </div>
+                <ul class="game-features">
+                    <li>公平随机对战</li>
+                    <li>实时计分系统</li>
+                    <li>连续游戏模式</li>
+                </ul>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 灵心巧手 - 让人工智能更有趣</p>
+        </div>
+    </div>
+</body>
+</html>

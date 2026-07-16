@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>石头剪刀布游戏 - 对战灵巧手</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 第一行：标题和倒计时 -->
+        <div class="row row-title">
+            <div class="back-to-home">
+                <a href="../" class="back-link">← 返回主页</a>
+            </div>
+            <header class="game-header">
+                <h1>🎮 竞技模式 - 与灵巧手一决高下！</h1>
+            </header>
+            <!-- 游戏状态显示 -->
+            <div class="game-status">
+                <div id="game-status-text" class="hidden">状态信息</div>
+                <div id="countdown-display" class="countdown hidden">3</div>
+            </div>
+        </div>
+
+        <!-- 第二行：控制按钮 -->
+        <div class="row row-controls">
+            <div class="controls-group">
+                <!-- 游戏控制按钮 -->
+                <div class="game-controls">
+                    <button id="start-btn" class="btn btn-start">🎯 开始游戏</button>
+                    <button id="pause-btn" class="btn btn-pause" disabled>⏸️ 暂停</button>
+                    <button id="stop-btn" class="btn btn-stop" disabled>🛑 结束</button>
+                </div>
+
+                <!-- 摄像头控制 -->
+                <div class="camera-controls">
+                    <label for="camera-select" class="camera-label">摄像头</label>
+                    <select id="camera-select" class="camera-select" aria-label="选择摄像头">
+                        <option value="">正在加载摄像头列表...</option>
+                    </select>
+                    <button id="camera-start-btn" class="btn btn-secondary" disabled>📷 启动摄像头</button>
+                    <button id="camera-stop-btn" class="btn btn-secondary" disabled>📷 停止摄像头</button>
+                </div>
+            </div>
+            
+            <div id="status" class="status">正在加载手部检测模型...</div>
+        </div>
+
+        <!-- 第三行：主要内容区域 -->
+        <div class="row row-main">
+            <!-- 左侧：摄像头区域 (70%宽度) -->
+            <div class="video-section">
+                <div id="video-container" class="video-container">
+                    <video id="webcam" autoplay playsinline></video>
+                    <canvas id="output-canvas"></canvas>
+                    <div id="fps" class="fps-counter">FPS: 0</div>
+                </div>
+            </div>
+
+            <!-- 右侧：信息区域 (30%宽度) -->
+            <div class="info-section">
+                <!-- 记分板 -->
+                <div class="scoreboard">
+                    <div class="score-card player-score">
+                        <h4>👤 玩家</h4>
+                        <div class="score" id="player-score">0</div>
+                    </div>
+                    <div class="score-vs">VS</div>
+                    <div class="score-card robot-score">
+                        <h4>🤖 灵巧手</h4>
+                        <div class="score" id="robot-score">0</div>
+                    </div>
+                </div>
+
+                <!-- 手势对比显示 -->
+                <div class="gesture-comparison hidden" id="gesture-comparison">
+                    <div class="gesture-display">
+                        <h5>👤 你的手势</h5>
+                        <div class="gesture-icon" id="player-gesture">❓</div>
+                        <div class="gesture-name" id="player-gesture-name">等待识别...</div>
+                    </div>
+                    <div class="vs-separator">VS</div>
+                    <div class="gesture-display">
+                        <h5>🤖 灵巧手</h5>
+                        <div class="gesture-icon" id="robot-gesture">❓</div>
+                        <div class="gesture-name" id="robot-gesture-name">准备中...</div>
+                    </div>
+                </div>
+
+                <!-- 游戏结果显示 -->
+                <div class="game-result hidden" id="game-result">
+                    <div class="result-text" id="result-text">平局！</div>
+                    <div class="result-detail" id="result-detail">再来一局吧！</div>
+                </div>
+
+                <!-- 手势检测信息 -->
+                <div class="detection-info">
+                    <div class="hand-info">
+                        <div class="info-item">
+                            <span class="info-label">检测到的手:</span>
+                            <span class="info-value" id="hand-count">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">当前手势:</span>
+                            <span class="info-value" id="current-gesture">等待手势...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 手势置信度卡片 -->
+                <div class="gesture-cards">
+                    <div class="gesture-card" id="rock-card">
+                        <div class="gesture-emoji">👊</div>
+                        <div class="gesture-label">石头</div>
+                        <div class="confidence" id="rock-confidence">0%</div>
+                    </div>
+                    <div class="gesture-card" id="paper-card">
+                        <div class="gesture-emoji">✋</div>
+                        <div class="gesture-label">布</div>
+                        <div class="confidence" id="paper-confidence">0%</div>
+                    </div>
+                    <div class="gesture-card" id="scissors-card">
+                        <div class="gesture-emoji">✌️</div>
+                        <div class="gesture-label">剪刀</div>
+                        <div class="confidence" id="scissors-confidence">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部：详细信息（可折叠） -->
+        <div class="row row-debug">
+            <details class="debug-info">
+                <summary>🔍 详细检测信息</summary>
+                <div id="landmarks-info" class="landmarks-info">
+                    尚未检测到手部
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 加载 MediaPipe 相关库 -->
+    <script src="libs/tensorflow/4.2.0/tf.min.js"></script>
+    <script src="libs/mediapipe/hands.js"></script>
+    <script src="libs/mediapipe/drawing_utils.js"></script>
+    
+    <!-- 
+        通信方案说明:
+        方案1: HTTP API (默认启用) - 通过HTTP请求发送手势数据到localhost:9090
+        方案2: SocketCAN (已注释) - 通过CAN总线直接控制灵巧手
+        
+        切换方案：修改app.js中的COMMUNICATION_METHOD常量
+    -->
+    
+    <script src="../shared/rps-recognition.js"></script>
+    <!-- 游戏逻辑 -->
+    <script src="app.js"></script>
+</body>
+</html>

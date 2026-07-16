@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时手部检测 - 石头剪刀布识别</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 加载 TensorFlow.js -->
+    <script src="../6.gameplay/libs/tensorflow/4.2.0/tf.min.js"></script>
+    
+    <!-- 加载 MediaPipe Hands 模型 -->
+    <script src="../6.gameplay/libs/mediapipe/hands.js"></script>
+    <script src="../6.gameplay/libs/mediapipe/drawing_utils.js"></script>
+    <script src="../6.gameplay/libs/mediapipe/camera_utils.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="back-to-home">
+            <a href="../" class="back-link">← 返回主页</a>
+        </div>
+        <h1>必胜模式 - AI策略对战</h1>
+        <p>灵巧手会分析你的手势并出克制手势</p>
+        
+        <div id="status">正在加载模型...</div>
+
+        <div class="controls">
+            <label for="camera-select" class="camera-label">摄像头</label>
+            <select id="camera-select" aria-label="选择摄像头">
+                <option value="">正在加载摄像头列表...</option>
+            </select>
+            <button id="start-btn" disabled>启动摄像头</button>
+            <button id="stop-btn" disabled>停止</button>
+        </div>
+
+        <div class="gesture-results">
+            <div class="gesture-card" id="rock-card">
+                <h3>石头 👊</h3>
+                <div class="gesture-confidence" id="rock-confidence">0%</div>
+            </div>
+            <div class="gesture-card" id="paper-card">
+                <h3>布 ✋</h3>
+                <div class="gesture-confidence" id="paper-confidence">0%</div>
+            </div>
+            <div class="gesture-card" id="scissors-card">
+                <h3>剪刀 ✌️</h3>
+                <div class="gesture-confidence" id="scissors-confidence">0%</div>
+            </div>
+        </div>
+
+        <div id="video-container">
+            <video id="webcam" autoplay playsinline></video>
+            <canvas id="output-canvas"></canvas>
+            <div id="fps" class="fps-counter">FPS: 0</div>
+            <div id="gesture-display" class="gesture-display">等待手势...</div>
+        </div>
+
+        <div class="hand-count">检测到的手: <span id="hand-count">0</span></div>
+        
+        <div class="info">
+            <h3>手部关键点信息:</h3>
+            <div id="landmarks-info" class="landmarks-info">
+                尚未检测到手部
+            </div>
+        </div>
+    </div>
+
+    <script src="../shared/rps-recognition.js"></script>
+    <!-- 加载应用脚本 -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 跟随模式 — RealSense D405</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="back-to-home">
+            <a href="../" class="back-link">← 返回主页</a>
+            <a href="../4.follow-me/" class="back-link secondary">2D 跟随</a>
+        </div>
+        <h1>3D 跟随模式</h1>
+        <p>RealSense D405 深度实测 — 关节点<strong>颜色表示远近</strong>，数值为距镜头的实测距离（厘米）</p>
+
+        <div id="status">请先启动 hand_tracking_service.py，再连接跟踪服务</div>
+
+        <div class="controls">
+            <label for="ws-url" class="camera-label">跟踪服务</label>
+            <input id="ws-url" type="text" value="ws://localhost:8765" class="ws-input" />
+            <button id="connect-btn">连接 3D 跟踪</button>
+            <button id="disconnect-btn" disabled>断开</button>
+        </div>
+
+        <div id="joint-bars" class="joint-bars" aria-label="关节角度条"></div>
+
+        <div id="video-container">
+            <img id="preview" alt="D405 彩色预览" />
+            <canvas id="overlay" aria-hidden="true"></canvas>
+            <div id="depth-hud" class="depth-hud">
+                <div class="depth-hud-title">RealSense 深度</div>
+                <div id="wrist-depth" class="depth-hud-value">-- cm</div>
+                <div id="depth-hint" class="depth-hud-hint">前后移动手，此值应变化</div>
+            </div>
+            <div id="fps" class="fps-counter">FPS: 0</div>
+            <div id="gesture-display" class="gesture-display">等待 3D 手部…</div>
+        </div>
+
+        <div id="depth-proof" class="depth-proof" aria-label="深度读数">
+            <h3>深度读数</h3>
+            <p class="depth-proof-tip">保持手形不变，<strong>前后移动</strong>手时，「手腕距镜头」应随之变化。</p>
+            <div class="depth-proof-grid">
+                <div class="depth-proof-card">
+                    <span class="label">手腕距镜头</span>
+                    <span id="proof-wrist" class="value">-- cm</span>
+                </div>
+                <div class="depth-proof-card">
+                    <span class="label">指尖深度差</span>
+                    <span id="proof-spread" class="value">-- cm</span>
+                    <span class="sub">五指远近跨度</span>
+                </div>
+                <div class="depth-proof-card">
+                    <span class="label">食指尖深度</span>
+                    <span id="proof-index-depth" class="value">-- cm</span>
+                </div>
+            </div>
+            <div class="depth-bar-wrap">
+                <span class="label">手腕深度条（20–60cm）</span>
+                <div class="depth-bar-track">
+                    <div id="depth-bar-fill" class="depth-bar-fill"></div>
+                </div>
+            </div>
+            <table class="coords-table">
+                <thead>
+                    <tr><th>关键点</th><th>X</th><th>Y</th><th>Z</th><th>说明</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>食指尖</td>
+                        <td id="ix-x">--</td><td id="ix-y">--</td><td id="ix-z">--</td>
+                        <td>手系 3D 坐标（米）</td>
+                    </tr>
+                    <tr>
+                        <td>拇指尖</td>
+                        <td id="th-x">--</td><td id="th-y">--</td><td id="th-z">--</td>
+                        <td>来自深度反投影</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hand-count">检测到的手: <span id="hand-count">0</span></div>
+
+        <div class="info">
+            <h3>3D 关节信息</h3>
+            <div id="landmarks-info" class="landmarks-info">尚未连接跟踪服务</div>
+        </div>
+    </div>
+
+    <script src="../shared/hand-retarget.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跟随模式 — 关节手势跟随</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="../6.gameplay/libs/tensorflow/4.2.0/tf.min.js"></script>
+    <script src="../6.gameplay/libs/mediapipe/hands.js"></script>
+    <script src="../6.gameplay/libs/mediapipe/drawing_utils.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="back-to-home">
+            <a href="../" class="back-link">← 返回主页</a>
+        </div>
+        <h1>跟随模式 - 手势跟随</h1>
+        <p>灵巧手会模仿你的手势动作</p>
+        
+        <div id="status">正在加载模型...</div>
+        
+        <div class="controls">
+            <label for="camera-select" class="camera-label">摄像头</label>
+            <select id="camera-select" aria-label="选择摄像头">
+                <option value="">正在加载摄像头列表...</option>
+            </select>
+            <button id="start-btn" disabled>启动摄像头</button>
+            <button id="stop-btn" disabled>停止</button>
+        </div>
+
+        <div id="joint-bars" class="joint-bars" aria-label="关节角度条"></div>
+
+        <div id="video-container">
+            <video id="webcam" autoplay playsinline></video>
+            <canvas id="output-canvas"></canvas>
+            <div id="fps" class="fps-counter">FPS: 0</div>
+            <div id="gesture-display" class="gesture-display">等待手部…</div>
+        </div>
+
+        <div class="hand-count">检测到的手: <span id="hand-count">0</span></div>
+        
+        <div class="info">
+            <h3>手部与关节信息</h3>
+            <div id="landmarks-info" class="landmarks-info">
+                尚未检测到手部
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

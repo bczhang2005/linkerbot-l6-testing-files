@@ -1,0 +1,274 @@
+.event-log {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.event-log h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.event-log-content {
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 14px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.event-log-item {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+.event-log-item:last-child {
+    border-bottom: none;
+}
+
+.event-log-gesture {
+    font-weight: bold;
+}
+
+.event-log-time {
+    color: #7f8c8d;
+    font-size: 12px;
+}
+
+.secondary-button {
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.secondary-button:hover {
+    background-color: #7f8c8d;
+}.gesture-message {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(46, 204, 113, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    transition: bottom 0.5s ease-in-out;
+    font-size: 18px;
+    min-width: 300px;
+    text-align: center;
+}
+
+.gesture-message.show {
+    bottom: 30px;
+}
+
+.gesture-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.gesture-message-confidence {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 4px;
+}
+
+.gesture-message-time {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+}body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+#video-container {
+    position: relative;
+    margin: 20px auto;
+    width: 640px;
+    height: 480px;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#webcam, #output-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#output-canvas {
+    z-index: 10;
+}
+
+#status {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.controls {
+    margin: 20px 0;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.info {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e8f4f8;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.landmarks-info {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.hand-count {
+    font-size: 18px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin: 10px 0;
+}
+
+.fps-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 20;
+}
+
+.gesture-display {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 30;
+    min-width: 200px;
+}
+
+.gesture-icon {
+    font-size: 36px;
+    margin-right: 10px;
+}
+
+.gesture-results {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.gesture-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    width: 30%;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.gesture-card.active {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    background-color: #e8f4f8;
+}
+
+.gesture-card img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.gesture-card h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.gesture-confidence {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 12px;
+}
