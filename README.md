@@ -2,7 +2,7 @@
 
 本目录为个人编写的 **LinkerBot L6 灵巧手** 实验代码，用于在 Windows + PCAN 环境下完成：环境验证、SDK 功能探索、姿势控制、视觉联动、角度标定等工作。
 
-> 依赖公司的 `linkerbot` SDK；改编版 `dexterous-hand-rps` Web 游戏位于本目录下 `dexterous/` 中（基于公司原版，含 3D 跟随等自创功能）。
+> 依赖公司的 `linkerbot` SDK；改编版 `dexterous-hand-rps` Web 游戏位于本目录下 `dexterous/` 中（基于公司原版，含 3D 跟随等新增功能）。
 
 ---
 
@@ -18,7 +18,7 @@ testing/
 ├── poses/                    ← 预设姿势与 GUI 调试
 ├── vision/                   ← RealSense D405：2D 虚拟摄像头、3D 跟踪、L6 桥接（见 vision/README.md）
 ├── calibration/              ← 角度标定流水线与数据
-├── dexterous/                ← 改编版 dexterous-hand-rps Web 游戏（含 3D 跟随等自创功能）
+├── dexterous/                ← 改编版 dexterous-hand-rps Web 游戏（含 3D 跟随等新增功能）
 └── docs/                     ← 操作指南
 ```
 
@@ -147,12 +147,12 @@ python 角度标定_画图.py
 按推荐顺序：`test2_move.py` → `test3_read.py` → `test4_stream.py` → `test_move_stream.py`
 
 
-| 类别   | 脚本                                                                                                       |
-| ---- | -------------------------------------------------------------------------------------------------------- |
-| 运动控制 | `test2_move.py`、`test2_move_new.py`、`test2_move_fail.py`、`test_move_stream.py`、`test_speed.py`、`完整示例.py` |
-| 数据读取 | `test3_read.py`、`test4_stream.py`、`只开角度轮询.py`、`只开力传感器轮询.py`                                              |
-| 传感器  | `testing_L6.py`、`testing_fault.py`、`test_force_sensor.py`、`电流轮询.py`、`test_version.py`                    |
-| 队列复现 | `queue_full_replay.py`                                                                                   |
+| 类别   | 脚本                                                                                    |
+| ---- | ------------------------------------------------------------------------------------- |
+| 运动控制 | `test2_move.py`、`test2_move_new.py`、`test_move_stream.py`、`test_speed.py`、`完整示例.py`   |
+| 数据读取 | `test3_read.py`、`test4_stream.py`、`只开角度轮询.py`、`只开力传感器轮询.py`                           |
+| 传感器  | `testing_L6.py`、`testing_fault.py`、`test_force_sensor.py`、`电流轮询.py`、`test_version.py` |
+| 问题复现 | `test2_move_fail.py`、`queue_full_replay.py`                                           |
 
 
 
@@ -233,10 +233,10 @@ python 角度标定_画图.py
 ## 与公司代码的关系
 
 
-| 公司代码                 | 本仓库如何使用                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件                                                                                    |
-| `dexterous-hand-rps` | 改编版已纳入本仓库 `dexterous/`；`vision/windows_l6_bridge.py` 桥接其 HTTP API；页面 `/4.follow-me/`、`/6.gameplay/`、自创 `/7.follow-me-3d/` |
+| 公司代码                 | 本仓库如何使用                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `linkerbot` SDK      | 所有脚本通过 `from linkerbot import L6` 控制硬件                                                                                   |
+| `dexterous-hand-rps` | 改编版已纳入本仓库 `dexterous/`；`vision/windows_l6_bridge.py` 桥接其 HTTP API；页面 `/4.follow-me/`、`/6.gameplay/`、新增`/7.follow-me-3d/` |
 
 
 ---
